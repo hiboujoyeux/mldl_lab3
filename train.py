@@ -73,10 +73,15 @@ def main():
     for epoch in range(1, num_epochs + 1):
         train(epoch, model, train_loader, criterion, optimizer)
         val_accuracy = validate(model, val_loader, criterion)
-        best_acc = max(best_acc, val_accuracy)
+        if val_accuracy > best_acc:
+            best_acc = val_accuracy
+            torch.save(model.state_dict(), 'checkpoints/best_model.pth')
+            print(f'Model saved with accuracy: {best_acc:.2f}%')
     
     print(f'Best validation accuracy: {best_acc:.2f}%')
     wandb.log({"best_val_acc": best_acc})
+
+    
 
 if __name__ == '__main__':
     main()
