@@ -2,6 +2,7 @@ import torch
 from models.custom_net import CustomNet
 from data.dataloader import get_dataloaders
 from data.preprocess import preprocess_tiny_imagenet
+import wandb
 
 def train(epoch, model, train_loader, criterion, optimizer):
     model.train()
@@ -23,6 +24,8 @@ def train(epoch, model, train_loader, criterion, optimizer):
         _, predicted = outputs.max(1)
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
+
+        wandb.log({"loss": loss.item()})
 
     train_loss = running_loss / len(train_loader)
     train_accuracy = 100. * correct / total
@@ -50,9 +53,15 @@ def validate(model, val_loader, criterion):
     val_accuracy = 100. * correct / total
 
     print(f'Validation Loss: {val_loss:.6f} Acc: {val_accuracy:.2f}%')
+    wandb.log({"val_loss": val_loss, "val_acc": val_accuracy})
     return val_accuracy
 
 def main():
+    wandb.init(project='gpt3')
+
+    config = wandb.config
+    config.learning_rate = 0.01
+    
     preprocess_tiny_imagenet()
     train_loader, val_loader = get_dataloaders()
     model = CustomNet().cuda()
@@ -67,6 +76,7 @@ def main():
         best_acc = max(best_acc, val_accuracy)
     
     print(f'Best validation accuracy: {best_acc:.2f}%')
+    wandb.log({"best_val_acc": best_acc})
 
 if __name__ == '__main__':
     main()
