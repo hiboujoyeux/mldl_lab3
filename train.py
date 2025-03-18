@@ -1,6 +1,7 @@
 import torch
 from models.custom_net import CustomNet
 from data.dataloader import get_dataloaders
+from data.preprocess import preprocess_tiny_imagenet
 
 def train(epoch, model, train_loader, criterion, optimizer):
     model.train()
@@ -52,6 +53,7 @@ def validate(model, val_loader, criterion):
     return val_accuracy
 
 def main():
+    preprocess_tiny_imagenet()
     train_loader, val_loader = get_dataloaders()
     model = CustomNet().cuda()
     criterion = torch.nn.CrossEntropyLoss()
